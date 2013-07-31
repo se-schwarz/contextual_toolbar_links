@@ -3,16 +3,16 @@
 /**
  * Implement hook page_alter
  */
-function contextual_toolbar_links_page_alter(&$page) {
+function ctl_page_alter(&$page) {
     if (isset($page['page_top']['toolbar']) && user_access('administer site configuration')) {
-        $page['page_top']['toolbar']['#pre_render'][] = 'contextual_toolbar_links_toolbar_add_links';
+        $page['page_top']['toolbar']['#pre_render'][] = 'ctl_toolbar_add_links';
     }
 }
 
 /**
  * Helper function that adds the tabs links of the current page to the admin menu toolbar
  */
-function contextual_toolbar_links_toolbar_add_links($toolbar) {
+function ctl_toolbar_add_links($toolbar) {
     $local_tasks = menu_local_tasks();
     $tabs = array_reverse($local_tasks['tabs']['output']);
     
