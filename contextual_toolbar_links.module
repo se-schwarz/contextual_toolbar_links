@@ -1,0 +1,40 @@
+<?php
+
+/**
+ * Implement hook page_alter
+ */
+function contextual_toolbar_links_page_alter(&$page) {
+    if (isset($page['page_top']['toolbar']) && user_access('administer site configuration')) {
+        $page['page_top']['toolbar']['#pre_render'][] = 'contextual_toolbar_links_toolbar_add_links';
+    }
+}
+
+/**
+ * Helper function that adds the tabs links of the current page to the admin menu toolbar
+ */
+function contextual_toolbar_links_toolbar_add_links($toolbar) {
+    $local_tasks = menu_local_tasks();
+    $tabs = array_reverse($local_tasks['tabs']['output']);
+    
+    //$placeholder_right = array(
+    //    'title' => ']',
+    //    'href' => ''
+    //);
+    //$toolbar['toolbar_user']['#links'] = array_merge(array('placeholder_right' => $placeholder_right), $toolbar['toolbar_user']['#links']);
+    
+    foreach($tabs as $tab) {
+        $link = array(
+            'title' => $tab['#link']['title'],
+            'href' => $tab['#link']['href'],
+        );
+        $toolbar['toolbar_user']['#links'] = array_merge(array($tab['#link']['href'] => $link), $toolbar['toolbar_user']['#links']);
+    }
+    
+    //$placeholder_left = array(
+    //    'title' => '[',
+    //    'href' => ''
+    //);
+    //$toolbar['toolbar_user']['#links'] = array_merge(array('placeholder_left' => $placeholder_left), $toolbar['toolbar_user']['#links']);
+    
+    return $toolbar;
+}
