@@ -1,6 +1,32 @@
 <?php
 
 /**
+ * Implements hook_permission().
+ */
+function ctl_permission() {
+  return array(
+    'config ctl' => array(
+      'title' => t('Configure contextual toolbar links'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function ctl_menu() {
+  $items['admin/config/user-interface/ctl'] = array(
+    'title' => 'Contextual Toolbar Links',
+    'description' => 'Display the contextual links in the admin toolbar',
+    'page callback' => 'ctl_admin',
+    'access arguments' => array('config ctl'),
+    'file' => 'ctl.admin.inc',
+  );
+  return $items;
+}
+
+
+/**
  * Implement hook page_alter
  */
 function ctl_page_alter(&$page) {
