@@ -18,8 +18,10 @@ function ctl_menu() {
   $items['admin/config/user-interface/ctl'] = array(
     'title' => 'Contextual Toolbar Links',
     'description' => 'Display the contextual links in the admin toolbar',
-    'page callback' => 'ctl_admin',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ctl_admin_settings_form'),
     'access arguments' => array('config ctl'),
+    'type' => MENU_NORMAL_ITEM,
     'file' => 'ctl.admin.inc',
   );
   return $items;
@@ -30,37 +32,34 @@ function ctl_menu() {
  * Implement hook page_alter
  */
 function ctl_page_alter(&$page) {
-    if (isset($page['page_top']['toolbar']) && user_access('administer site configuration')) {
-        $page['page_top']['toolbar']['#pre_render'][] = 'ctl_toolbar_add_links';
-    }
+  if (isset($page['page_top']['toolbar']) && user_access('administer site configuration')) {
+    $page['page_top']['toolbar']['#pre_render'][] = 'ctl_toolbar_add_links';
+  }
 }
 
 /**
  * Helper function that adds the tabs links of the current page to the admin menu toolbar
  */
 function ctl_toolbar_add_links($toolbar) {
-    $local_tasks = menu_local_tasks();
-    $tabs = array_reverse($local_tasks['tabs']['output']);
+  $local_tasks = menu_local_tasks();
     
-    //$placeholder_right = array(
-    //    'title' => ']',
-    //    'href' => ''
-    //);
-    //$toolbar['toolbar_user']['#links'] = array_merge(array('placeholder_right' => $placeholder_right), $toolbar['toolbar_user']['#links']);
-    
-    foreach($tabs as $tab) {
-        $link = array(
-            'title' => $tab['#link']['title'],
-            'href' => $tab['#link']['href'],
-        );
-        $toolbar['toolbar_user']['#links'] = array_merge(array($tab['#link']['href'] => $link), $toolbar['toolbar_user']['#links']);
+  foreach ($local_tasks as $key => $local_task) {
+    if ($key == 'root_path')
+      continue;
+        
+    $task_active = variable_get('ctl_use_'.$key, 0);
+        
+    if ($task_active !== 1)
+      continue;
+      
+    foreach($local_task['output'] as $tab) {
+      $link = array(
+        'title' => $tab['#link']['title'],
+        'href' => $tab['#link']['href'],
+      );
+      $toolbar['toolbar_user']['#links'] = array_merge(array($tab['#link']['href'] => $link), $toolbar['toolbar_user']['#links']);
     }
+  }
     
-    //$placeholder_left = array(
-    //    'title' => '[',
-    //    'href' => ''
-    //);
-    //$toolbar['toolbar_user']['#links'] = array_merge(array('placeholder_left' => $placeholder_left), $toolbar['toolbar_user']['#links']);
-    
-    return $toolbar;
+  return $toolbar;
 }
