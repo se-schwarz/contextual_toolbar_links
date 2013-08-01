@@ -52,7 +52,7 @@ function ctl_toolbar_add_links($toolbar) {
     if ($task_active !== 1)
       continue;
       
-    foreach($local_task['output'] as $tab) {
+    foreach(array_reverse($local_task['output']) as $tab) {
       $link = array(
         'title' => $tab['#link']['title'],
         'href' => $tab['#link']['href'],
