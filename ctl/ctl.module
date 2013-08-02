@@ -32,7 +32,7 @@ function ctl_menu() {
  * Implement hook page_alter
  */
 function ctl_page_alter(&$page) {
-  if (isset($page['page_top']['toolbar']) && user_access('administer site configuration')) {
+  if (isset($page['page_top']['toolbar']) && user_access('access contextual links')) {
     $page['page_top']['toolbar']['#pre_render'][] = 'ctl_toolbar_add_links';
   }
 }
