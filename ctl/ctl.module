@@ -32,9 +32,15 @@ function ctl_menu() {
  * Implement hook page_alter
  */
 function ctl_page_alter(&$page) {
-  if (isset($page['page_top']['toolbar']) && user_access('access contextual links')) {
+  if (isset($page['page_top']['toolbar']) && user_access('administer site configuration')) {
     $page['page_top']['toolbar']['#pre_render'][] = 'ctl_toolbar_add_links';
   }
+}
+
+/**
+ * Implements hook_preprocess_page().
+ */
+function ctl_preprocess_page(&$variables) {
 }
 
 /**
@@ -51,8 +57,13 @@ function ctl_toolbar_add_links($toolbar) {
         
     if ($task_active !== 1)
       continue;
-      
-    foreach(array_reverse($local_task['output']) as $tab) {
+    
+    $output = $local_task['output'];
+    if (variable_get('ctl_reverse_'.$key, 0) == 0) {
+        $output = array_reverse($output);
+    }
+    
+    foreach($output as $tab) {
       $link = array(
         'title' => $tab['#link']['title'],
         'href' => $tab['#link']['href'],
