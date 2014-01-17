@@ -48,29 +48,48 @@ function ctl_preprocess_page(&$variables) {
  */
 function ctl_toolbar_add_links($toolbar) {
   $local_tasks = menu_local_tasks();
-    
+
   foreach ($local_tasks as $key => $local_task) {
     if ($key == 'root_path')
       continue;
-        
+
     $task_active = variable_get('ctl_use_'.$key, 0);
-        
+
     if ($task_active !== 1)
       continue;
-    
+
     $output = $local_task['output'];
     if (variable_get('ctl_reverse_'.$key, 0) == 0) {
-        $output = array_reverse($output);
+      $output = array_reverse($output);
     }
-    
+
+
+    if($key == 'tabs' && variable_get('ctl_rewrite_view', 0) == 1) {
+      $object = menu_get_object();
+      if (isset($object->nid)) {
+        $link = array(
+          'title' => 'node/'.$object->nid,
+          'href' => '',
+          // There is a plan to make this clickable, and onclick copy the content to clipboard
+          //'attributes' => array(
+          //  'onClick' => 'this.select()',
+          //  'rel' => 'internal-path'
+          //)
+        );
+        $toolbar['toolbar_user']['#links'] = array_merge(array('#' => $link), $toolbar['toolbar_user']['#links']);
+      }
+    }
+
     foreach($output as $tab) {
+      $title = $tab['#link']['title'];
+      $href = $tab['#link']['href'];
       $link = array(
-        'title' => $tab['#link']['title'],
-        'href' => $tab['#link']['href'],
+        'title' => $title,
+        'href' => $href,
       );
       $toolbar['toolbar_user']['#links'] = array_merge(array($tab['#link']['href'] => $link), $toolbar['toolbar_user']['#links']);
     }
   }
-    
+
   return $toolbar;
 }

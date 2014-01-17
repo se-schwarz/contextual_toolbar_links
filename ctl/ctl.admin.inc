@@ -27,7 +27,13 @@ function ctl_admin_settings_form($form_state) {
       '#title' => t('Reverse order'),
       '#default_value' => variable_get('ctl_reverse_'.$key, 0),
     );
-      
+    if ($key == 'tabs') {
+      $form['tasks']['fieldset_'.$key]['ctl_rewrite_view'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Display internal path in seperate button.'),
+        '#default_value' => variable_get('ctl_rewrite_view', 0),
+      );
+    }
   }
   return system_settings_form($form);
 }
