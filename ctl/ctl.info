@@ -1,0 +1,5 @@
+name = Contextual Toolbar Links
+description = Displays the contextual links of the current page in the admintoolbar 
+core = "7.x"
+
+version = "7.x-1.1"

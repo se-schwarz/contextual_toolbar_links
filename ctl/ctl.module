@@ -1,0 +1,98 @@
+<?php
+
+/**
+ * @file
+ * This file contains the logic of the ctl module.
+ *
+ * The module copies the content contextual links into the admin toolbar.
+ */
+
+/**
+ * Implements hook_permission().
+ */
+function ctl_permission() {
+  return array(
+    'config ctl' => array(
+      'title' => t('Configure contextual toolbar links'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_menu().
+ */
+function ctl_menu() {
+  $items['admin/config/user-interface/ctl'] = array(
+    'title' => 'Contextual Toolbar Links',
+    'description' => 'Display the contextual links in the admin toolbar',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ctl_admin_settings_form'),
+    'access arguments' => array('config ctl'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'ctl.admin.inc',
+  );
+  return $items;
+}
+
+
+/**
+ * Implement hook_page_alter().
+ *
+ * Hooks into the page_alter function and adds the ctl_toolbar_add_links function to the pre_render array.
+ */
+function ctl_page_alter(&$page) {
+  if (isset($page['page_top']['toolbar']) && user_access('administer site configuration')) {
+    $page['page_top']['toolbar']['#pre_render'][] = '_ctl_toolbar_add_links';
+  }
+}
+
+/**
+ * This function parses the menu_local_tasks() and adds them to the admintoolbar.
+ */
+function _ctl_toolbar_add_links($toolbar) {
+  $local_tasks = menu_local_tasks();
+
+  foreach ($local_tasks as $key => $local_task) {
+    if ($key == 'root_path')
+      continue;
+
+    $task_active = variable_get('ctl_use_' . $key, 0);
+
+    if ($task_active !== 1)
+      continue;
+
+    $output = $local_task['output'];
+    if (variable_get('ctl_reverse_' . $key, 0) == 0) {
+      $output = array_reverse($output);
+    }
+
+
+    if ($key == 'tabs' && variable_get('ctl_rewrite_view', 0) == 1) {
+      $object = menu_get_object();
+      if (isset($object->nid)) {
+        $link = array(
+          'title' => 'node/' . $object->nid,
+          'href' => '',
+          // There is a plan to highlight the text on click so someone can just hit ctrl+c to copy it
+          //'attributes' => array(
+          //  'onClick' => 'this.select()',
+          //  'rel' => 'internal-path'
+          //)
+        );
+        $toolbar['toolbar_user']['#links'] = array_merge(array('#' => $link), $toolbar['toolbar_user']['#links']);
+      }
+    }
+
+    foreach ($output as $tab) {
+      $title = $tab['#link']['title'];
+      $href = $tab['#link']['href'];
+      $link = array(
+        'title' => $title,
+        'href' => $href,
+      );
+      $toolbar['toolbar_user']['#links'] = array_merge(array($tab['#link']['href'] => $link), $toolbar['toolbar_user']['#links']);
+    }
+  }
+
+  return $toolbar;
+}
