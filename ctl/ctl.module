@@ -1,6 +1,13 @@
 <?php
 
 /**
+ * @file
+ * This file contains the logic of the ctl module.
+ *
+ * The module copies the content contextual links into the admin toolbar.
+ */
+
+/**
  * Implements hook_permission().
  */
 function ctl_permission() {
@@ -32,7 +39,9 @@ function ctl_menu() {
 
 
 /**
- * Implement hook page_alter
+ * Implement hook_page_alter().
+ *
+ * Hooks into the page_alter function and adds the ctl_toolbar_add_links function to the pre_render array.
  */
 function ctl_page_alter(&$page) {
   if (isset($page['page_top']['toolbar']) && user_access('display ctl')) {
@@ -41,39 +50,33 @@ function ctl_page_alter(&$page) {
 }
 
 /**
- * Implements hook_preprocess_page().
+ * This function parses the menu_local_tasks() and adds them to the admintoolbar.
  */
-function ctl_preprocess_page(&$variables) {
-}
-
-/**
- * Helper function that adds the tabs links of the current page to the admin menu toolbar
- */
-function ctl_toolbar_add_links($toolbar) {
+function _ctl_toolbar_add_links($toolbar) {
   $local_tasks = menu_local_tasks();
 
   foreach ($local_tasks as $key => $local_task) {
     if ($key == 'root_path')
       continue;
 
-    $task_active = variable_get('ctl_use_'.$key, 0);
+    $task_active = variable_get('ctl_use_' . $key, 0);
 
     if ($task_active !== 1)
       continue;
 
     $output = $local_task['output'];
-    if (variable_get('ctl_reverse_'.$key, 0) == 0) {
+    if (variable_get('ctl_reverse_' . $key, 0) == 0) {
       $output = array_reverse($output);
     }
 
 
-    if($key == 'tabs' && variable_get('ctl_rewrite_view', 0) == 1) {
+    if ($key == 'tabs' && variable_get('ctl_rewrite_view', 0) == 1) {
       $object = menu_get_object();
       if (isset($object->nid)) {
         $link = array(
-          'title' => 'node/'.$object->nid,
+          'title' => 'node/' . $object->nid,
           'href' => '',
-          // There is a plan to make this clickable, and onclick copy the content to clipboard
+          // There is a plan to highlight the text on click so someone can just hit ctrl+c to copy it
           //'attributes' => array(
           //  'onClick' => 'this.select()',
           //  'rel' => 'internal-path'
@@ -83,7 +86,7 @@ function ctl_toolbar_add_links($toolbar) {
       }
     }
 
-    foreach($output as $tab) {
+    foreach ($output as $tab) {
       $title = $tab['#link']['title'];
       $href = $tab['#link']['href'];
       $link = array(
